@@ -9,7 +9,7 @@ out/
 # macOS
 .DS_Store
 
-# Test reports
+# Reports
 test-output/
 allure-results/
 allure-report/
