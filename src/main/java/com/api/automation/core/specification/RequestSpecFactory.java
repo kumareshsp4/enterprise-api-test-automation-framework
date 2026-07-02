@@ -1,5 +1,6 @@
 package com.api.automation.core.specification;
 
+import com.api.automation.core.authentication.BearerTokenProvider;
 import com.api.automation.core.config.ConfigManager;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.ErrorLoggingFilter;
@@ -13,25 +14,35 @@ public final class RequestSpecFactory {
     }
 
     public static RequestSpecification goRestRequest() {
-        return commonRequestSpec(
+        return commonRequestBuilder(
                 ConfigManager.get("gorest.base.url")
-        );
+        ).build();
+    }
+
+    public static RequestSpecification goRestAuthenticatedRequest() {
+        return commonRequestBuilder(
+                ConfigManager.get("gorest.base.url")
+        )
+                .addHeader(
+                        "Authorization",
+                        "Bearer " + BearerTokenProvider.getGoRestToken()
+                )
+                .build();
     }
 
     public static RequestSpecification petStoreRequest() {
-        return commonRequestSpec(
+        return commonRequestBuilder(
                 ConfigManager.get("petstore.base.url")
-        );
+        ).build();
     }
 
-    private static RequestSpecification commonRequestSpec(
+    private static RequestSpecBuilder commonRequestBuilder(
             String baseUrl) {
 
         return new RequestSpecBuilder()
                 .setBaseUri(baseUrl)
                 .setAccept(ContentType.JSON)
                 .setContentType(ContentType.JSON)
-                .addFilter(new ErrorLoggingFilter())
-                .build();
+                .addFilter(new ErrorLoggingFilter());
     }
 }
