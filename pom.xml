@@ -3,30 +3,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-
-    <!-- Project identity -->
-    <groupId>com.examples</groupId>
+    <groupId>com.api.automation</groupId>
     <artifactId>enterprise-api-test-automation-framework</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-
     <name>Enterprise API Test Automation Framework</name>
-
     <description>
-        A scalable API test automation framework built with Java, REST Assured, TestNG, Maven, and åGitHub Actions.
+        A scalable multi-service API automation framework using Java, REST Assured, TestNG, and Maven.
     </description>
 
     <properties>
-        <!-- Java -->
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <env>qa</env>
-        <rest.assured.version>6.0.0</rest.assured.version>
+        <rest-assured.version>6.0.0</rest-assured.version>
         <testng.version>7.12.0</testng.version>
-        <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
-        <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
+        <lombok.version>1.18.46</lombok.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <env>qa</env>
     </properties>
 
     <dependencies>
@@ -35,43 +31,54 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>${rest.assured.version}</version>
+            <version>${rest-assured.version}</version>
         </dependency>
-        <!-- JSON schema validation -->
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>json-schema-validator</artifactId>
-            <version>${rest.assured.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Test execution framework -->
+
+        <!-- Test execution -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Model boilerplate reduction -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
 
-            <!-- Compile using Java 17 -->
+            <!-- Compile the framework for Java 17 compatibility -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.plugin.version}</version>
+                <version>${maven-compiler-plugin.version}</version>
 
                 <configuration>
                     <release>${maven.compiler.release}</release>
+
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 
-            <!-- Run TestNG tests -->
+            <!-- Execute TestNG tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven.surefire.plugin.version}</version>
+                <version>${maven-surefire-plugin.version}</version>
 
                 <configuration>
                     <suiteXmlFiles>
@@ -79,6 +86,7 @@
                             src/test/resources/testng.xml
                         </suiteXmlFile>
                     </suiteXmlFiles>
+
                     <systemPropertyVariables>
                         <env>${env}</env>
                     </systemPropertyVariables>
