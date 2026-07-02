@@ -12,4 +12,12 @@
         </classes>
     </test>
 
+    <test name="GoRest CRUD Tests">
+        <classes>
+            <class name="com.api.automation.tests.gorest.users.UserCrudTest"/>
+            <class name="com.api.automation.tests.gorest.users.UserNegativeTest"/>
+            <class name="com.api.automation.tests.gorest.posts.PostCrudTest"/>
+        </classes>
+    </test>
+
 </suite>
