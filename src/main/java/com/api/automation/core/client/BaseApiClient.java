@@ -7,21 +7,16 @@ import static io.restassured.RestAssured.given;
 
 public abstract class BaseApiClient {
 
-    protected Response get(
-            RequestSpecification requestSpecification,
-            String endpoint
-    ) {
+    protected Response get(RequestSpecification requestSpecification, String endpoint)
+    {
         return given()
                 .spec(requestSpecification)
                 .when()
                 .get(endpoint);
     }
 
-    protected Response post(
-            RequestSpecification requestSpecification,
-            String endpoint,
-            Object requestBody
-    ) {
+    protected Response post(RequestSpecification requestSpecification, String endpoint, Object requestBody )
+    {
         return given()
                 .spec(requestSpecification)
                 .body(requestBody)
@@ -29,11 +24,8 @@ public abstract class BaseApiClient {
                 .post(endpoint);
     }
 
-    protected Response put(
-            RequestSpecification requestSpecification,
-            String endpoint,
-            Object requestBody
-    ) {
+    protected Response put(RequestSpecification requestSpecification, String endpoint, Object requestBody)
+    {
         return given()
                 .spec(requestSpecification)
                 .body(requestBody)
@@ -41,11 +33,8 @@ public abstract class BaseApiClient {
                 .put(endpoint);
     }
 
-    protected Response patch(
-            RequestSpecification requestSpecification,
-            String endpoint,
-            Object requestBody
-    ) {
+    protected Response patch(RequestSpecification requestSpecification,String endpoint,Object requestBody)
+    {
         return given()
                 .spec(requestSpecification)
                 .body(requestBody)
@@ -53,10 +42,8 @@ public abstract class BaseApiClient {
                 .patch(endpoint);
     }
 
-    protected Response delete(
-            RequestSpecification requestSpecification,
-            String endpoint
-    ) {
+    protected Response delete(RequestSpecification requestSpecification,String endpoint)
+    {
         return given()
                 .spec(requestSpecification)
                 .when()
