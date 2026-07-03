@@ -1,0 +1,97 @@
+name: API Automation Tests
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+
+  pull_request:
+    branches:
+      - main
+
+  # Nightly run: 2:15 AM New York during EDT = 6:15 AM UTC
+  schedule:
+    - cron: "15 6 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-tests:
+    name: Smoke Tests on Code Push
+    runs-on: ubuntu-latest
+
+    # Run smoke tests only for push and pull request events
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
+    env:
+      GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Verify Java and Maven versions
+        run: |
+          java -version
+          mvn -version
+
+      - name: Run smoke tests
+        run: |
+          mvn --batch-mode clean test \
+            -Dtest=GoRestSmokeTest,PetStoreSmokeTest
+
+      - name: Upload smoke test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-reports
+          path: target/surefire-reports/
+          retention-days: 14
+
+  nightly-regression:
+    name: Nightly Full Regression
+    runs-on: ubuntu-latest
+
+    # Run full suite only for scheduled or manual workflow runs
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+    env:
+      GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Verify Java and Maven versions
+        run: |
+          java -version
+          mvn -version
+
+      - name: Run full regression suite
+        run: mvn --batch-mode clean test
+
+      - name: Upload nightly regression reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-regression-reports
+          path: target/surefire-reports/
+          retention-days: 14
