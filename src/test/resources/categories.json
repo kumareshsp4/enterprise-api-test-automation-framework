@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Authentication Failures",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*401.*|.*Authentication failed.*"
+  },
+  {
+    "name": "Validation Failures",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*422.*|.*validation.*|.*can't be blank.*"
+  },
+  {
+    "name": "Resource Not Found",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*404.*|.*not found.*"
+  },
+  {
+    "name": "API Contract / Response Mismatch",
+    "matchedStatuses": ["failed"],
+    "traceRegex": ".*AssertionError.*|.*JsonMappingException.*"
+  }
+]

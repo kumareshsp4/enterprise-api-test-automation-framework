@@ -1,0 +1,31 @@
+services:
+  api-tests:
+    build: .
+    image: enterprise-api-tests
+    environment:
+      GOREST_TOKEN: ${GOREST_TOKEN}
+    volumes:
+      - ./target:/workspace/target
+    command: ["clean", "test"]
+
+  smoke-tests:
+    build: .
+    image: enterprise-api-tests
+    environment:
+      GOREST_TOKEN: ${GOREST_TOKEN}
+    volumes:
+      - ./target:/workspace/target
+    command:
+      - clean
+      - test
+      - -Dtest=GoRestSmokeTest,PetStoreSmokeTest
+
+  petstore-tests:
+    build: .
+    image: enterprise-api-tests
+    volumes:
+      - ./target:/workspace/target
+    command:
+      - clean
+      - test
+      - -Dtest=PetCrudTest

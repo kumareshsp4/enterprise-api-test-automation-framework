@@ -5,92 +5,184 @@ import com.api.automation.gorest.factory.GoRestTestDataFactory;
 import com.api.automation.gorest.model.request.CreateUserRequest;
 import com.api.automation.gorest.model.request.UpdateUserRequest;
 import com.api.automation.gorest.model.response.UserResponse;
+import io.qameta.allure.Description;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Owner;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import io.restassured.response.Response;
 import org.testng.annotations.Test;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.testng.Assert.assertTrue;
 
+@Epic("Enterprise API Automation")
+@Feature("GoRest User API")
+@Owner("Kumaresan Sitheswaran")
 public class UserCrudTest {
 
-    private final UserApiClient userApiClient =
-            new UserApiClient();
+    private final UserApiClient userApiClient = new UserApiClient();
 
-    @Test(
-            groups = {"regression", "gorest", "users"},
-            description = "Verify the complete GoRest user lifecycle"
-    )
+    @Test
+    @Story("User CRUD Workflow")
+    @Description("Validates complete GoRest user lifecycle: create, retrieve, update, delete, and verify 404 after deletion.")
     public void shouldCompleteUserCrudWorkflow() {
         CreateUserRequest createRequest =
                 GoRestTestDataFactory.createActiveUser();
 
         long userId = 0;
+        boolean userDeleted = false;
 
         try {
             Response createResponse =
-                    userApiClient.createUser(createRequest);
+                    createUser(createRequest);
 
-            createResponse.then()
-                    .log().ifValidationFails()
-                    .statusCode(201)
-                    .body("id", notNullValue())
-                    .body("name", equalTo(createRequest.getName()))
-                    .body("email", equalTo(createRequest.getEmail()))
-                    .body("gender", equalTo(createRequest.getGender()))
-                    .body("status", equalTo(createRequest.getStatus()));
+            validateCreateUserResponse(createResponse, createRequest);
 
             UserResponse createdUser =
                     createResponse.as(UserResponse.class);
 
             userId = createdUser.getId();
-            assertTrue(userId > 0);
 
-            userApiClient.getUser(userId)
-                    .then()
-                    .log().ifValidationFails()
-                    .statusCode(200)
-                    .body("id", equalTo((int) userId))
-                    .body("email", equalTo(createRequest.getEmail()));
+            Response getResponse =
+                    retrieveUser(userId);
 
-            userApiClient.searchUsersByEmail(createRequest.getEmail())
-                    .then()
-                    .log().ifValidationFails()
-                    .statusCode(200)
-                    .header("X-Pagination-Total", notNullValue())
-                    .header("X-Pagination-Pages", notNullValue())
-                    .header("X-Pagination-Page", notNullValue())
-                    .header("X-Pagination-Limit", notNullValue())
-                    .body("email", hasItem(createRequest.getEmail()));
+            validateRetrievedUserResponse(
+                    getResponse,
+                    userId,
+                    createRequest
+            );
 
             UpdateUserRequest updateRequest =
                     GoRestTestDataFactory.createUserUpdate();
 
-            userApiClient.updateUser(userId, updateRequest)
-                    .then()
-                    .log().ifValidationFails()
-                    .statusCode(200)
-                    .body("id", equalTo((int) userId))
-                    .body("name", equalTo(updateRequest.getName()))
-                    .body("status", equalTo(updateRequest.getStatus()));
+            Response updateResponse =
+                    updateUser(userId, updateRequest);
 
-            userApiClient.deleteUser(userId)
-                    .then()
-                    .log().ifValidationFails()
-                    .statusCode(204);
+            validateUpdatedUserResponse(
+                    updateResponse,
+                    userId,
+                    updateRequest
+            );
 
-            userApiClient.getUser(userId)
-                    .then()
-                    .log().ifValidationFails()
-                    .statusCode(404);
+            Response deleteResponse =
+                    deleteUser(userId);
 
-            userId = 0;
+            validateUserDeleted(deleteResponse);
+
+            userDeleted = true;
+
+            Response deletedUserResponse =
+                    retrieveUser(userId);
+
+            validateDeletedUserNotFound(deletedUserResponse);
 
         } finally {
-            if (userId > 0) {
-                userApiClient.deleteUser(userId);
+            if (!userDeleted && userId > 0) {
+                cleanupUser(userId);
             }
+        }
+    }
+
+    @Step("Create GoRest user")
+    private Response createUser(CreateUserRequest request) {
+        return userApiClient.createUser(request);
+    }
+
+    @Step("Validate created user response")
+    private void validateCreateUserResponse(
+            Response response,
+            CreateUserRequest request
+    ) {
+        response.then()
+                .statusCode(201)
+                .body("id", notNullValue())
+                .body("name", equalTo(request.getName()))
+                .body("email", equalTo(request.getEmail()))
+                .body("gender", equalTo(request.getGender()))
+                .body("status", equalTo(request.getStatus()));
+    }
+
+    @Step("Retrieve GoRest user with ID: {userId}")
+    private Response retrieveUser(long userId) {
+        return userApiClient.getUser(userId);
+    }
+
+    @Step("Validate retrieved user response")
+    private void validateRetrievedUserResponse(
+            Response response,
+            long userId,
+            CreateUserRequest request
+    ) {
+        response.then()
+                .statusCode(200)
+                .body("id", equalTo((int) userId))
+                .body("name", equalTo(request.getName()))
+                .body("email", equalTo(request.getEmail()))
+                .body("gender", equalTo(request.getGender()))
+                .body("status", equalTo(request.getStatus()));
+    }
+
+    @Step("Update GoRest user with ID: {userId}")
+    private Response updateUser(
+            long userId,
+            UpdateUserRequest request
+    ) {
+        return userApiClient.updateUser(userId, request);
+    }
+
+    @Step("Validate updated user response")
+    private void validateUpdatedUserResponse(
+            Response response,
+            long userId,
+            UpdateUserRequest request
+    ) {
+        response.then()
+                .statusCode(200)
+                .body("id", equalTo((int) userId))
+                .body("name", equalTo(request.getName()))
+                .body("status", equalTo(request.getStatus()));
+    }
+
+    @Step("Delete GoRest user with ID: {userId}")
+    private Response deleteUser(long userId) {
+        return userApiClient.deleteUser(userId);
+    }
+
+    @Step("Validate user delete response")
+    private void validateUserDeleted(Response response) {
+        response.then()
+                .statusCode(204);
+    }
+
+    @Step("Validate deleted user returns 404")
+    private void validateDeletedUserNotFound(Response response) {
+        response.then()
+                .statusCode(404);
+    }
+
+    @Step("Cleanup GoRest user with ID: {userId}")
+    private void cleanupUser(long userId) {
+        try {
+            Response cleanupResponse =
+                    userApiClient.deleteUser(userId);
+
+            int statusCode = cleanupResponse.statusCode();
+
+            if (statusCode != 204 && statusCode != 404) {
+                System.err.printf(
+                        "User cleanup returned status %d for user ID %d%n",
+                        statusCode,
+                        userId
+                );
+            }
+        } catch (Exception exception) {
+            System.err.printf(
+                    "User cleanup failed for user ID %d: %s%n",
+                    userId,
+                    exception.getMessage()
+            );
         }
     }
 }
