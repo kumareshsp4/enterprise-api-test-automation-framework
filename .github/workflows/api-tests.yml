@@ -1,0 +1,51 @@
+name: API Automation Tests
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  api-tests:
+    name: Run API Test Suite
+    runs-on: ubuntu-latest
+
+    env:
+      GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Verify Java and Maven versions
+        run: |
+          java -version
+          mvn -version
+
+      - name: Run API tests
+        run: mvn --batch-mode clean test
+
+      - name: Upload Surefire test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
+          retention-days: 14
