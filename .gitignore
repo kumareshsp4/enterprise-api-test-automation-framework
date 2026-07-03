@@ -9,16 +9,21 @@ out/
 # macOS
 .DS_Store
 
-# Reports
+# TestNG / Reports
 test-output/
+.allure/
 allure-results/
-allure-report/
 
 # Logs
 *.log
 logs/
 
-# Secrets
+# Secrets / Local config
 .env
+.env.*
+!.env.example
 secrets.properties
 *.local.properties
+
+# Docker / local runtime
+docker-compose.override.yml
