@@ -16,11 +16,9 @@ import static org.hamcrest.Matchers.notNullValue;
 
 public class PostCrudTest {
 
-    private final UserApiClient userApiClient =
-            new UserApiClient();
+    private final UserApiClient userApiClient = new UserApiClient();
 
-    private final PostApiClient postApiClient =
-            new PostApiClient();
+    private final PostApiClient postApiClient = new PostApiClient();
 
     @Test(
             groups = {"regression", "gorest", "posts"},

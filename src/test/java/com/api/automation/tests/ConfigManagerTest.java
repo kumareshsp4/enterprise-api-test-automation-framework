@@ -26,7 +26,7 @@ public class ConfigManagerTest {
 
         assertEquals(
                 petStoreUrl,
-                "https://petstore3.swagger.io/api/v3"
+                "https://petstore.swagger.io/v2"
         );
     }
 }

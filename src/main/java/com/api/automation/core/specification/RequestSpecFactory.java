@@ -33,7 +33,7 @@ public final class RequestSpecFactory {
     public static RequestSpecification petStoreRequest() {
         return commonRequestBuilder(
                 ConfigManager.get("petstore.base.url")
-        ).build();
+        ).  build();
     }
 
     private static RequestSpecBuilder commonRequestBuilder(
